@@ -14,3 +14,6 @@ A new Flutter project.
 7. execute the code using the darteval function in run time
 8. add a canvas page to draw different shapes and freehand
 9. add animation sequence for each sketch(drawing layer)
+
+
+## واخد بالك يا اياد يارب تكون صحيت بس
