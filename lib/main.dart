@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:scratch_clone/home_screen.dart';
+import 'package:provider/provider.dart';
+import 'package:scratch_clone/block_state_provider.dart';
 import 'package:scratch_clone/main_screen.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => BlockStateProvider(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
