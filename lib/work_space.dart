@@ -1,8 +1,9 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:scratch_clone/block_model.dart';
-import 'package:scratch_clone/block_model.dart' as custom;
+import 'package:scratch_clone/block_state_provider.dart';
 import 'package:scratch_clone/draggable_block.dart';
 
 class WorkSpace extends StatefulWidget {
@@ -13,82 +14,80 @@ class WorkSpace extends StatefulWidget {
 }
 
 class _WorkSpaceState extends State<WorkSpace> {
-  final List<BlockModel> activeBlocks = <BlockModel>[
-    BlockModel(
-      color: Colors.red,
-      source: Source.workSpace,
-      position: const Offset(100, 100),
-      width: 100.0,
-      height: 100.0,
-      blockType: BlockType.input,
-      state: custom.ConnectionState.disconnected,
-    ),
-  ];
-  final List<BlockModel> connectedBlocks = <BlockModel>[];
-
   @override
   Widget build(BuildContext context) {
+    final blockProvider = Provider.of<BlockStateProvider>(context);
     return Container(
       color: Colors.blue,
       child: DragTarget<BlockModel>(
-        builder: (context, candidateData, rejectedData) {
-          return Stack(
-            children: [
-              // Render each active block
-              ...activeBlocks.map(
-                (block) => Positioned(
-                  top: block.position!.dy,
-                  left: block.position!.dx,
-                  child: DraggableBlock(
-                    color: block.color,
-                    blockModel: block,
-                    onDragUpdate: (newPosition) {
-                      setState(() {
-                        block.position = newPosition;
-                      });
-                    },
-                    onAccept: (Offset newPosition) {
-                      setState(() {
-                        block.position = newPosition;
-                        connectedBlocks.add(block);
-                        log("dragged block color is ${block.color} and drag target block color is ${connectedBlocks[0].color}");
-                        log("Connected Blocks: $connectedBlocks");
-                      });
-                    },
-                  ),
-                ),
-              ),
-            ],
-          );
-        },
-        onWillAcceptWithDetails: (details) {
-          return true;
-        },
-        onAcceptWithDetails: (details) {
-          setState(() {
-            final RenderBox renderBox = context.findRenderObject() as RenderBox;
-            final Offset localOffset = renderBox.globalToLocal(details.offset);
+          builder: (context, candidateData, rejectedData) {
+        return Stack(
+          children: renderNestedBlocks(context),
+        );
+      }, onWillAcceptWithDetails: (details) {
+        return true;
+      }, onAcceptWithDetails: (details) {
+        final RenderBox renderBox = context.findRenderObject() as RenderBox;
+        final Offset localOffset = renderBox.globalToLocal(details.offset);
 
-            if (details.data.source == Source.storage) {
-              activeBlocks.add(BlockModel(
-                color: details.data.color,
-                position: localOffset,
-                width: details.data.width,
-                height: details.data.height,
-                blockType: details.data.blockType,
-                state: details.data.state,
-                source: Source.workSpace,
-              ));
-              log("Active Blocks: $activeBlocks");
-            }else{
-              int activeBlockIndex = activeBlocks.indexWhere((block)=> block == details.data);
-              if(activeBlockIndex != -1){
-                activeBlocks[activeBlockIndex].position = localOffset.translate(-details.data.width/2, -details.data.height/2);
-              }
-            }
-          });
-        },
+        if (details.data.source == Source.storage) {
+          blockProvider.updateActiveBlocks(BlockModel(
+            code:details.data.code,
+            color: details.data.color,
+            position: localOffset,
+            width: details.data.width,
+            height: details.data.height,
+            blockType: details.data.blockType,
+            state: details.data.state,
+            source: Source.workSpace,
+            blockId: details.data.blockId,
+          ));
+          log("Active Blocks: ${blockProvider.activeBlocks}");
+        } else {
+          var activeBLocks = blockProvider.activeBlocks;
+          var index = activeBLocks.indexWhere((block)=>block == blockProvider.selectedBlock);
+          if(index != -1){
+            blockProvider.updateBlockPosition(blockProvider.selectedBlock, localOffset);
+          }
+        }
+      }),
+    );
+  }
+
+  Widget renderBLocks(BuildContext context, BlockModel block) {
+
+    return Positioned(
+      top: block.position!.dy,
+      left: block.position!.dx,
+      child: DraggableBlock(
+        color: block.color,
+        blockModel: block,
       ),
     );
   }
+
+List<Widget> renderNestedBlocks(BuildContext context) {
+  List<Widget> blocksPositioned = [];
+  var provider = Provider.of<BlockStateProvider>(context);
+  
+  for (var block in provider.activeBlocks) {
+    blocksPositioned.addAll(traverseAndRender(context, block));
+  }
+  
+  return blocksPositioned;
+}
+
+List<Widget> traverseAndRender(BuildContext context, BlockModel block) {
+  List<Widget> blocks = [];
+  
+  blocks.add(renderBLocks(context, block));
+
+  
+  if (block.child != null) {
+    log("block id: ${block.blockId} has position ${block.position} has child ${block.child!.blockId} and the child is at position ${block.child!.position}");
+    blocks.addAll(traverseAndRender(context, block.child!));
+  }
+
+  return blocks;
+}
 }

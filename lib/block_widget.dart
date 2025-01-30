@@ -8,15 +8,19 @@ class BlockWidget extends StatelessWidget {
   final BlockModel blockModel;
   final Color color;
   const BlockWidget({super.key, required this.blockModel, required this.color});
-  
+
   @override
   Widget build(BuildContext context) {
     return Stack(
       alignment: Alignment.center,
       children: [
         CustomPaint(
-          size: const Size(100,100),
+          size: const Size(100, 100),
           painter: BlockPainter(color: color),
+        ),
+        Text(
+          blockModel.code,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         )
       ],
     );
@@ -24,7 +28,7 @@ class BlockWidget extends StatelessWidget {
 }
 
 class BlockPainter extends CustomPainter {
-   final Color color;
+  final Color color;
   const BlockPainter({
     required this.color,
   });
@@ -35,11 +39,13 @@ class BlockPainter extends CustomPainter {
       ..style = PaintingStyle.fill;
     double width = size.width * 0.6;
     double height = size.height * 0.3;
-    double left = (size.width - width) / 2; 
+    double left = (size.width - width) / 2;
     double top = (size.height - height) / 2;
     Rect rect = Rect.fromLTWH(left, top, width, height);
-    Rect oval = Rect.fromCircle(center: Offset(size.width / 2, top), radius: 10);
-    Rect indent = Rect.fromCircle(center: Offset(size.width / 2, top + height), radius: 10);
+    Rect oval =
+        Rect.fromCircle(center: Offset(size.width / 2, top), radius: 10);
+    Rect indent = Rect.fromCircle(
+        center: Offset(size.width / 2, top + height), radius: 10);
     Path path = Path()
       ..addRect(rect)
       ..addOval(oval);

@@ -1,19 +1,21 @@
 import 'dart:developer';
-
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:scratch_clone/block_model.dart';
+import 'package:scratch_clone/block_state_provider.dart';
 import 'package:scratch_clone/block_widget.dart';
+import 'package:scratch_clone/block_model.dart' as custom;
+
 
 class DraggableBlock extends StatelessWidget {
   final BlockModel blockModel;
-  final Function(Offset newPosition) onDragUpdate;
-  final Function(Offset newPosition) onAccept;
   final Color color;
   const DraggableBlock(
-      {super.key, required this.blockModel, required this.onDragUpdate, required this.onAccept, required this.color});
+      {super.key, required this.blockModel, required this.color});
 
   @override
   Widget build(BuildContext context) {
+    final blockProvider = Provider.of<BlockStateProvider>(context);
     GlobalKey key = GlobalKey();
     return DragTarget<BlockModel>(
       key: key,
@@ -21,20 +23,34 @@ class DraggableBlock extends StatelessWidget {
         return Draggable(
           data: blockModel,
           feedback: BlockWidget(blockModel: blockModel, color: color),
-          childWhenDragging: BlockWidget(blockModel: blockModel,  color: color.withOpacity(0.5)),
+          childWhenDragging: BlockWidget(
+              blockModel: blockModel, color: color.withOpacity(0.5)),
           child: BlockWidget(blockModel: blockModel, color: color),
-          onDragEnd: (details){
-            onDragUpdate(details.offset);
+          onDragEnd: (details) {
+            var draggedBlock = blockProvider.selectedBlock;
+            blockProvider.updateBlockPosition(draggedBlock, details.offset);
+          },
+          onDragStarted: () {
+            blockProvider.selectedBlock = blockModel;
+            if(blockModel.state == custom.ConnectionState.connected){
+              blockProvider.disconnectBlock(blockProvider.selectedBlock);
+            }
           },
         );
       },
-      onAcceptWithDetails: (details){
-        RenderBox renderBox = key.currentContext!.findRenderObject() as RenderBox;
-        Offset localOffset = renderBox.localToGlobal(Offset.zero);
-        Size size = renderBox.size;
+      onAcceptWithDetails: (details) {
         
-        log("${details.data.blockType} block accepted at $localOffset with size $size");
-        onAccept(localOffset-const Offset(100, 100));
+        RenderBox renderBox =  key.currentContext!.findRenderObject() as RenderBox;
+        Size size = renderBox.size;
+
+        var parentBlock = blockModel;
+        var childBlock = details.data;
+        log("block number ${childBlock.blockId} is dropped on block number ${parentBlock.blockId}");
+        blockProvider.connectBlock(parentBlock, childBlock);
+        blockProvider.updateBlockPosition(
+          childBlock,
+          parentBlock.position! + Offset(0, size.height - 75),
+        );
       },
     );
   }

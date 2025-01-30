@@ -16,6 +16,8 @@ enum Source{
 }
 
 class BlockModel {
+  int blockId;
+  String code;
   Color color;
   Offset? position;
   ConnectionState state;
@@ -23,7 +25,11 @@ class BlockModel {
   double width;
   double height;
   Source source;
+  BlockModel? child;
+  BlockModel? parent;
   BlockModel({
+    required this.blockId,
+    required this.code,
     required this.color,
     this.position,
     required this.state,
@@ -31,6 +37,8 @@ class BlockModel {
     required this.width,
     required this.height,
     required this.source,
+    this.child,
+    this.parent
   });
 
   @override
@@ -44,7 +52,10 @@ class BlockModel {
       other.blockType == blockType &&
       other.width == width &&
       other.height == height &&
-      other.source == source;
+      other.source == source &&
+      other.child == child &&
+      other.parent == parent &&
+      other.code == code;
   }
 
   @override
@@ -55,10 +66,14 @@ class BlockModel {
       blockType.hashCode ^
       width.hashCode ^
       height.hashCode ^
-      source.hashCode;
+      source.hashCode ^ 
+      child.hashCode ^
+      parent.hashCode ^
+      code.hashCode;
   }
 
   BlockModel copyWith({
+    int? blockId,
     Color? color,
     Offset? position,
     ConnectionState? state,
@@ -66,8 +81,12 @@ class BlockModel {
     double? width,
     double? height,
     Source? source,
+    BlockModel? child,
+    BlockModel? parent,
+    String? code
   }) {
     return BlockModel(
+      blockId: blockId ?? this.blockId,
       color: color ?? this.color,
       position: position ?? this.position,
       state: state ?? this.state,
@@ -75,6 +94,9 @@ class BlockModel {
       width: width ?? this.width,
       height: height ?? this.height,
       source: source ?? this.source,
+      child: child ?? this.child,
+      parent: parent ?? this.parent,
+      code: code ?? ""
     );
   }
 
