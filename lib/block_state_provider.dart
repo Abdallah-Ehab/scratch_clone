@@ -82,7 +82,17 @@ void removeFromactive(BlockModel block){
     notifyListeners();
 }
 
+bool areAllBlocksConnected() {
+  if (activeBlocks.isEmpty) return true; // No blocks = already connected
 
+  if(activeBlocks.length > 1){
+    return false;
+  }else{
+    return true;
+  }
+
+
+}
 }
 
  
