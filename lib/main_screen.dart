@@ -82,7 +82,8 @@ class _MainScreenState extends State<MainScreen> {
       
       var currentRoot = rootBlock;
       res+=currentRoot.code;
-      while(currentRoot.child != null){
+      while(currentRoot.child != null)
+      {
         res+= currentRoot.child!.code;
         currentRoot = currentRoot.child!;
       }
