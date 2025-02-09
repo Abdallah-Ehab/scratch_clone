@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 
 import 'package:scratch_clone/block_model.dart';
-import 'package:scratch_clone/home_screen.dart';
 
 class BlockWidget extends StatelessWidget {
   final BlockModel blockModel;
