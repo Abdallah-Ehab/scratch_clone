@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:scratch_clone/screens/animation_editor_screen.dart';
+import 'package:scratch_clone/gameobject/animation_editor_screen.dart';
 import 'package:scratch_clone/screens/blocks_screen.dart';
 import 'package:scratch_clone/screens/game_screen.dart';
 

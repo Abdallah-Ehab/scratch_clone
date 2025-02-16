@@ -3,7 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:scratch_clone/widgets/gameObjectWidgets/game_object_widget.dart';
+import 'package:scratch_clone/gameobject/game_object_widget.dart';
 import 'package:scratch_clone/providers/gameObjectProviders/game_object_manager_provider.dart';
 import 'package:scratch_clone/widgets/gameObjectWidgets/play_button.dart';
 
